@@ -281,9 +281,9 @@
                                             id="reportTable"  id="myTable">
                                             <thead>
                                                 <tr>
-                                                    <th class="text-center">PARTICULARS </th>
-                                                    <th class="text-center">DEBIT</th>
-                                                    <th class="text-center">CREDIT</th>
+                                                    <th c   lass="text-center">PARTICULARS </th>
+                                                    <th class="text-center">AMOUNT</th>
+                                                    <th class="text-center">AMOUNT</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -430,7 +430,7 @@
                                                 </tr>
 
                                                 <tr class="hidden child-row" style="opacity: 0.7;font-size: small;">
-                                                    <td>CUMPUTER</td>
+                                                    <td>COMPUTER</td>
                                                     <td class="text-center">0.00</td>
                                                     <td class="text-center">0.00</td>
                                                 </tr>
@@ -454,26 +454,31 @@
                                                 <tr class="parent-row" style="font-weight: 600;">
 
                                                     <td>CURRENT ASSETS</td>
-                                                    <td class="text-center">0.00    </td>
+                                                    <td class="text-center">0.00</td>
                                                     <td class="text-center">{{ total_current_asset|default:0|floatformat:2 }}</td>
 
-                                                </tr>
-
-                                                <tr class="hidden child-row" style="opacity: 0.7;font-size: small;">
-                                                    <td>OPENING STOCK</td>
-                                                    <td class="text-center">0.00</td>
-                                                    <td class="text-center">0.00</td>
-                                                </tr>
-                                                <tr class="hidden child-row" style="opacity: 0.7;font-size: small;">
-                                                    <td>DEPOSITS(ASSETS)</td>
-                                                    <td class="text-center">0.00</td>
-                                                    <td class="text-center">0.00</td>
                                                 </tr>
                                                 <tr class="hidden child-row" style="opacity: 0.7;font-size: small;">
                                                     <td>LOANS & ADVANCES (ASSETS)</td>
                                                     <td class="text-center">{{ total_loan_advance|default:0|floatformat:2 }}</td>
                                                     <td class="text-center">0.00</td>
                                                 </tr>
+                                                <tr class="hidden child-row" style="opacity: 0.7;font-size: small;">
+                                                    <td>CASH-IN-HAND</td>
+                                                    <td class="text-center">{{ total_cashinhand|default:0|floatformat:2 }}</td>
+                                                    <td class="text-center">0.00</td>
+                                                </tr>
+                                                <tr class="hidden child-row" style="opacity: 0.7;font-size: small;">
+                                                    <td>BANK ACCOUNTS</td>
+                                                    <td class="text-center">{{ total_bank_account|default:0|floatformat:2 }}</td>
+                                                    <td class="text-center">0.00</td>
+                                                </tr>
+                                                <tr class="hidden child-row parentchild-row" style="opacity: 0.7;font-size: small;">
+                                                    <td>CLOSING STOCK</td>
+                                                    <td class="text-center">{{ total_closing_stock|default:0|floatformat:2 }}</td>
+                                                    <td class="text-center">0.00</td>
+                                                </tr>
+
                                                 <tr class="hidden child-row parentchild-row"  style="opacity: 0.7;font-size: small;">
                                                     <td>SUNDRY DEBITORS</td>
                                                     <td class="text-center">{{ total_sundry_debitors|default:0|floatformat:2 }}</td>

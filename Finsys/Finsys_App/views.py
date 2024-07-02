@@ -54291,69 +54291,93 @@ def vertical_balance_sheet(request):
 
             allmodules = Fin_Modules_List.objects.get(company_id=cmp, status='New')
 
+            closing_stock = Fin_Items.objects.filter(Company_id=cmp,item_created__range=(start_date, end_date))
+            total_closing_stock = Fin_Items.objects.filter(Company_id=cmp,item_created__range=(start_date, end_date)).aggregate(total_closing_stock=Sum('current_stock'))['total_closing_stock'] or 0
+
+            total_cashinhand = Fin_CashInHand.objects.filter(Company_id=cmp,adjust_date__range=(start_date, end_date)).aggregate(total_cashinhand=Sum('amount'))['total_cashinhand'] or 0
+
+            total_bank_account = Fin_Banking.objects.filter(company_id=cmp).aggregate(total_bank_account=Sum('current_balance'))['total_bank_account'] or 0
+
             total_bank_loan = Fin_BankHolder.objects.filter(Company_id=cmp,Date__range=(start_date, end_date)).aggregate(total_bank_loan=Sum('ArithmeticErrormount'))['total_bank_loan'] or 0
 
             sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp,date__range=(start_date, end_date))
             total_sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp,date__range=(start_date, end_date)).aggregate(total_sundry_creditors=Sum('current_balance'))['total_sundry_creditors'] or 0
-
+            
             total_loan_advance = Employee.objects.filter(company_id=cmp,date_of_joining__range=(start_date, end_date)).aggregate(total_loan_advance=Sum('salary_amount'))['total_loan_advance'] or 0
 
-            sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp,date__range=(start_date, end_date))
+            sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp)
             total_sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp,date__range=(start_date, end_date)).aggregate(total_sundry_debitors=Sum('current_balance'))['total_sundry_debitors'] or 0
 
-            total_current_asset = int(total_loan_advance) + int(total_sundry_debitors)
+            total_current_asset = int(total_loan_advance) + int(total_sundry_debitors) + int(total_closing_stock) + int(total_cashinhand) + int(total_bank_account)
 
             total_liability = int(total_bank_loan) + int(total_sundry_creditors) 
 
             difference = int(total_current_asset) - int(total_liability)
 
+
             context = {
                 'cmp':cmp,
                 'allmodules':allmodules,
                 'total_bank_loan':total_bank_loan,
-                'sundry_creditors':sundry_creditors,
                 'total_sundry_creditors':total_sundry_creditors,
+                'sundry_creditors':sundry_creditors,
                 'total_loan_advance':total_loan_advance,
-                'sundry_debitors':sundry_debitors,
                 'total_sundry_debitors':total_sundry_debitors,
                 'total_current_asset':total_current_asset,
                 'total_liability':total_liability,
                 'difference':difference,
+                'sundry_debitors':sundry_debitors,
                 'start_date':start_date,
                 'end_date':end_date,
+                'closing_stock':closing_stock,
+                'total_closing_stock':total_closing_stock,
+                'total_cashinhand':total_cashinhand,
+                'total_bank_account':total_bank_account,
             }
             return render(request,'company/reports/vertical_balance_sheet.html',context)
 
     allmodules = Fin_Modules_List.objects.get(company_id=cmp, status='New')
+    
+    closing_stock = Fin_Items.objects.filter(Company_id=cmp)
+    total_closing_stock = Fin_Items.objects.filter(Company_id=cmp).aggregate(total_closing_stock=Sum('current_stock'))['total_closing_stock'] or 0
+    
+    total_cashinhand = Fin_CashInHand.objects.filter(Company_id=cmp).aggregate(total_cashinhand=Sum('amount'))['total_cashinhand'] or 0
+
+    total_bank_account = Fin_Banking.objects.filter(company_id=cmp).aggregate(total_bank_account=Sum('current_balance'))['total_bank_account'] or 0
 
     total_bank_loan = Fin_BankHolder.objects.filter(Company_id=cmp).aggregate(total_bank_loan=Sum('ArithmeticErrormount'))['total_bank_loan'] or 0
 
     sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp)
     total_sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp).aggregate(total_sundry_creditors=Sum('current_balance'))['total_sundry_creditors'] or 0
-
+    
     total_loan_advance = Employee.objects.filter(company_id=cmp).aggregate(total_loan_advance=Sum('salary_amount'))['total_loan_advance'] or 0
 
     sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp)
     total_sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp).aggregate(total_sundry_debitors=Sum('current_balance'))['total_sundry_debitors'] or 0
 
-    total_current_asset = int(total_loan_advance) + int(total_sundry_debitors)
+    total_current_asset = int(total_loan_advance) + int(total_sundry_debitors) + int(total_closing_stock) + int(total_cashinhand) + int(total_bank_account)
 
     total_liability = int(total_bank_loan) + int(total_sundry_creditors) 
 
     difference = int(total_current_asset) - int(total_liability)
 
+
     context = {
         'cmp':cmp,
         'allmodules':allmodules,
         'total_bank_loan':total_bank_loan,
-        'sundry_creditors':sundry_creditors,
         'total_sundry_creditors':total_sundry_creditors,
+        'sundry_creditors':sundry_creditors,
         'total_loan_advance':total_loan_advance,
-        'sundry_debitors':sundry_debitors,
         'total_sundry_debitors':total_sundry_debitors,
         'total_current_asset':total_current_asset,
         'total_liability':total_liability,
         'difference':difference,
+        'sundry_debitors':sundry_debitors,
+        'total_closing_stock':total_closing_stock,
+        'total_cashinhand':total_cashinhand,
+        'closing_stock':closing_stock,
+        'total_bank_account':total_bank_account,
     }
     return render(request,'company/reports/vertical_balance_sheet.html',context)
 
@@ -54384,68 +54408,92 @@ def vertical_balance_sheet_mail(request):
 
             allmodules = Fin_Modules_List.objects.get(company_id=cmp, status='New')
 
+            closing_stock = Fin_Items.objects.filter(Company_id=cmp,item_created__range=(start_date, end_date))
+            total_closing_stock = Fin_Items.objects.filter(Company_id=cmp,item_created__range=(start_date, end_date)).aggregate(total_closing_stock=Sum('current_stock'))['total_closing_stock'] or 0
+
+            total_cashinhand = Fin_CashInHand.objects.filter(Company_id=cmp,adjust_date__range=(start_date, end_date)).aggregate(total_cashinhand=Sum('amount'))['total_cashinhand'] or 0
+
+            total_bank_account = Fin_Banking.objects.filter(company_id=cmp).aggregate(total_bank_account=Sum('current_balance'))['total_bank_account'] or 0
+
             total_bank_loan = Fin_BankHolder.objects.filter(Company_id=cmp,Date__range=(start_date, end_date)).aggregate(total_bank_loan=Sum('ArithmeticErrormount'))['total_bank_loan'] or 0
 
             sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp,date__range=(start_date, end_date))
             total_sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp,date__range=(start_date, end_date)).aggregate(total_sundry_creditors=Sum('current_balance'))['total_sundry_creditors'] or 0
-
+            
             total_loan_advance = Employee.objects.filter(company_id=cmp,date_of_joining__range=(start_date, end_date)).aggregate(total_loan_advance=Sum('salary_amount'))['total_loan_advance'] or 0
 
-            sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp,date__range=(start_date, end_date))
+            sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp)
             total_sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp,date__range=(start_date, end_date)).aggregate(total_sundry_debitors=Sum('current_balance'))['total_sundry_debitors'] or 0
 
-            total_current_asset = int(total_loan_advance) + int(total_sundry_debitors)
+            total_current_asset = int(total_loan_advance) + int(total_sundry_debitors) + int(total_closing_stock) + int(total_cashinhand) + int(total_bank_account)
 
             total_liability = int(total_bank_loan) + int(total_sundry_creditors) 
 
             difference = int(total_current_asset) - int(total_liability)
 
+
             context = {
                 'cmp':cmp,
                 'allmodules':allmodules,
                 'total_bank_loan':total_bank_loan,
-                'sundry_creditors':sundry_creditors,
                 'total_sundry_creditors':total_sundry_creditors,
+                'sundry_creditors':sundry_creditors,
                 'total_loan_advance':total_loan_advance,
-                'sundry_debitors':sundry_debitors,
                 'total_sundry_debitors':total_sundry_debitors,
                 'total_current_asset':total_current_asset,
                 'total_liability':total_liability,
                 'difference':difference,
+                'sundry_debitors':sundry_debitors,
                 'start_date':start_date,
                 'end_date':end_date,
+                'closing_stock':closing_stock,
+                'total_closing_stock':total_closing_stock,
+                'total_cashinhand':total_cashinhand,
+                'total_bank_account':total_bank_account,
             }
         
         allmodules = Fin_Modules_List.objects.get(company_id=cmp, status='New')
+    
+        closing_stock = Fin_Items.objects.filter(Company_id=cmp)
+        total_closing_stock = Fin_Items.objects.filter(Company_id=cmp).aggregate(total_closing_stock=Sum('current_stock'))['total_closing_stock'] or 0
+        
+        total_cashinhand = Fin_CashInHand.objects.filter(Company_id=cmp).aggregate(total_cashinhand=Sum('amount'))['total_cashinhand'] or 0
+
+        total_bank_account = Fin_Banking.objects.filter(company_id=cmp).aggregate(total_bank_account=Sum('current_balance'))['total_bank_account'] or 0
 
         total_bank_loan = Fin_BankHolder.objects.filter(Company_id=cmp).aggregate(total_bank_loan=Sum('ArithmeticErrormount'))['total_bank_loan'] or 0
 
         sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp)
         total_sundry_creditors = Fin_Customers.objects.filter(Company_id=cmp).aggregate(total_sundry_creditors=Sum('current_balance'))['total_sundry_creditors'] or 0
-
+        
         total_loan_advance = Employee.objects.filter(company_id=cmp).aggregate(total_loan_advance=Sum('salary_amount'))['total_loan_advance'] or 0
 
         sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp)
         total_sundry_debitors = Fin_Vendors.objects.filter(Company_id=cmp).aggregate(total_sundry_debitors=Sum('current_balance'))['total_sundry_debitors'] or 0
 
-        total_current_asset = int(total_loan_advance) + int(total_sundry_debitors)
+        total_current_asset = int(total_loan_advance) + int(total_sundry_debitors) + int(total_closing_stock) + int(total_cashinhand) + int(total_bank_account)
 
         total_liability = int(total_bank_loan) + int(total_sundry_creditors) 
 
         difference = int(total_current_asset) - int(total_liability)
 
+
         context = {
             'cmp':cmp,
             'allmodules':allmodules,
             'total_bank_loan':total_bank_loan,
-            'sundry_creditors':sundry_creditors,
             'total_sundry_creditors':total_sundry_creditors,
+            'sundry_creditors':sundry_creditors,
             'total_loan_advance':total_loan_advance,
-            'sundry_debitors':sundry_debitors,
             'total_sundry_debitors':total_sundry_debitors,
             'total_current_asset':total_current_asset,
             'total_liability':total_liability,
             'difference':difference,
+            'sundry_debitors':sundry_debitors,
+            'total_closing_stock':total_closing_stock,
+            'total_cashinhand':total_cashinhand,
+            'closing_stock':closing_stock,
+            'total_bank_account':total_bank_account,
         }
 
         template_path = 'company/reports/vertical_balance_sheet_pdf.html'
